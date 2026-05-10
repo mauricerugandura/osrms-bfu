@@ -253,8 +253,3 @@ If you encounter any issues:
 
 ---
 
-**Congratulations!** 🎉
-
-You now have a fully functional Online Student Result Management System ready for your final exam presentation!
-
-**Good luck!** 🍀

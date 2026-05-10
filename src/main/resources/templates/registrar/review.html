@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Results - OSRMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --navy:#12263a; --indigo:#365486; --aqua:#2d9c9c; --ice:#f0f6f8; --ink:#1f2937; --muted:#6b7280; --line:#dfeaf0; --gold:#c99a3d; --green:#1f8a70; --red:#b91c1c; }
+        body { min-height:100vh; background:radial-gradient(circle at top left, rgba(45,156,156,.16), transparent 34rem), linear-gradient(180deg,#f9fcfd 0%,var(--ice) 100%); color:var(--ink); font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
+        .topbar { background:rgba(18,38,58,.96); box-shadow:0 10px 30px rgba(18,38,58,.16); }
+        .brand-mark { width:38px; height:38px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--aqua),#a9dfdf); color:#fff; font-weight:800; margin-right:.65rem; }
+        .page-shell { padding:2rem; }
+        .sidebar,.panel,.summary-card { border:1px solid var(--line); border-radius:22px; background:rgba(255,255,255,.94); box-shadow:0 18px 45px rgba(18,38,58,.08); overflow:hidden; }
+        .sidebar { position:sticky; top:1.25rem; }
+        .sidebar-title { color:var(--muted); font-size:.75rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+        .sidebar .nav-link { color:var(--ink); border-radius:14px; margin-top:.35rem; padding:.85rem 1rem; font-weight:700; }
+        .sidebar .nav-link.active,.sidebar .nav-link:hover { background:var(--navy); color:#fff; transform:translateX(2px); }
+        .summary-card { padding:1.25rem; margin-bottom:1.5rem; background:linear-gradient(135deg,#fff,#f4fbfb); }
+        .panel-header { padding:1.4rem 1.5rem; border-bottom:1px solid var(--line); background:#fff; }
+        .panel-title { color:var(--navy); font-weight:850; margin:0; }
+        .table thead { background:var(--navy); color:#fff; }
+        .table td,.table th { vertical-align:middle; }
+        .course-code,.student-code { color:var(--navy); font-weight:800; }
+        .grade-pill { min-width:42px; display:inline-flex; justify-content:center; border-radius:999px; padding:.25rem .65rem; font-weight:800; }
+        .grade-a { background:#e7f7ef; color:#16724f; }
+        .grade-b { background:#e4f3ff; color:#1f6f9f; }
+        .grade-c { background:#fff6db; color:#9a6b00; }
+        .grade-d { background:#fff0e3; color:#b45309; }
+        .grade-f { background:#fde8e8; color:var(--red); }
+        .status-pending { background:#fff4cc; color:#7a5a00; }
+        .status-approved { background:#dff4ff; color:#0e5d75; }
+        .status-published { background:#e5f7ed; color:#166534; }
+        .btn-primary { background:var(--navy); border-color:var(--navy); }
+        .btn-primary:hover { background:var(--indigo); border-color:var(--indigo); }
+        .btn-success { background:var(--green); border-color:var(--green); }
+        .btn-publish { background:var(--gold); border-color:var(--gold); color:#1f2937; font-weight:800; }
+        .btn-publish:hover { background:#b88928; border-color:#b88928; color:#111827; }
+        .action-form { display:inline-block; }
+        .empty-state { padding:3rem 1rem; text-align:center; color:var(--muted); }
+        .empty-state strong { display:block; color:var(--navy); font-size:1.1rem; margin-bottom:.25rem; }
+        .footer { color:var(--muted); padding:1.5rem 2rem; text-align:center; }
+        @media (max-width:991px) { .page-shell { padding:1rem; } .sidebar { position:static; } }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark topbar">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="/dashboard"><span class="brand-mark">R</span> Registrar Desk</a>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <span class="text-white-50 d-none d-sm-inline" sec:authentication="principal.name">Registrar</span>
+            <a href="/logout" class="btn btn-sm btn-outline-light rounded-pill px-3">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container-fluid page-shell">
+    <div class="row g-4">
+        <aside class="col-lg-3 col-xl-2">
+            <div class="sidebar p-3">
+                <div class="sidebar-title px-2 mb-2">Registrar</div>
+                <nav class="nav flex-column">
+                    <a href="/registrar/dashboard" class="nav-link">Dashboard</a>
+                    <a href="/registrar/review" class="nav-link active">Review Results</a>
+                </nav>
+            </div>
+        </aside>
+
+        <section class="col-lg-9 col-xl-10">
+            <div th:if="${param.approved}" class="alert alert-success alert-dismissible fade show" role="alert">
+                Result approved and moved forward in the publication workflow.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${param.published}" class="alert alert-info alert-dismissible fade show" role="alert">
+                Result published to the student portal.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${param.publishedCount}" class="alert alert-info alert-dismissible fade show" role="alert">
+                <span th:text="${param.publishedCount[0]}">0</span> approved result(s) published to student portals and transcripts.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="summary-card">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <div class="text-uppercase fw-bold small text-muted">Academic records queue</div>
+                        <h1 class="h3 panel-title mt-1">Review Results</h1>
+                        <p class="text-muted mb-0">Verify lecturer submissions before approving or publishing student records.</p>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge rounded-pill text-bg-light px-3 py-2" th:text="${results.size()} + ' pending'">0 pending</span>
+                        <span class="badge rounded-pill text-bg-warning px-3 py-2" th:text="${approvedResults.size()} + ' approved'">0 approved</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h2 class="panel-title h4">Pending Results</h2>
+                        <p class="text-muted mb-0">Scores awaiting registrar action.</p>
+                    </div>
+                    <a href="/registrar/dashboard" class="btn btn-outline-secondary rounded-pill px-3">Dashboard</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" th:if="${results.size() > 0}">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Course</th>
+                                <th>Score</th>
+                                <th>Grade</th>
+                                <th>Status</th>
+                                <th>Submitted</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="result : ${results}">
+                                <td>
+                                    <div class="student-code" th:text="${result.student.studentId}">STU001</div>
+                                    <div class="text-muted" th:text="${result.student.user.name}">Student Name</div>
+                                </td>
+                                <td>
+                                    <div class="course-code" th:text="${result.course.courseId}">CS101</div>
+                                    <div class="text-muted" th:text="${result.course.courseName}">Course Name</div>
+                                </td>
+                                <td th:text="${result.score}">85.5</td>
+                                <td><span th:class="'grade-pill grade-' + ${result.grade.toLowerCase()}" th:text="${result.grade}">A</span></td>
+                                <td><span th:class="'badge rounded-pill status-' + ${result.status.name().toLowerCase()}" th:text="${result.status}">PENDING</span></td>
+                                <td th:text="${#temporals.format(result.submittedAt, 'MMM dd, yyyy')}">Jan 01, 2024</td>
+                                <td class="text-end">
+                                    <form method="post" th:action="'/registrar/approve/' + ${result.id}" class="action-form">
+                                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3">Approve</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div th:if="${results.size() == 0}" class="empty-state">
+                        <strong>No pending results</strong>
+                        Lecturer submissions that need registrar review will appear here.
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel mt-4" id="approved-records">
+                <div class="panel-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h2 class="panel-title h4">Approved Records</h2>
+                        <p class="text-muted mb-0">These records are approved and ready to publish to students.</p>
+                    </div>
+                    <form method="post" action="/registrar/publish-approved" th:if="${approvedResults.size() > 0}">
+                        <button type="submit" class="btn btn-publish rounded-pill px-4">Publish All Approved</button>
+                    </form>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" th:if="${approvedResults.size() > 0}">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Course</th>
+                                <th>Score</th>
+                                <th>Grade</th>
+                                <th>Status</th>
+                                <th>Approved</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="result : ${approvedResults}">
+                                <td>
+                                    <div class="student-code" th:text="${result.student.studentId}">STU001</div>
+                                    <div class="text-muted" th:text="${result.student.user.name}">Student Name</div>
+                                </td>
+                                <td>
+                                    <div class="course-code" th:text="${result.course.courseId}">CS101</div>
+                                    <div class="text-muted" th:text="${result.course.courseName}">Course Name</div>
+                                </td>
+                                <td th:text="${result.score}">85.5</td>
+                                <td><span th:class="'grade-pill grade-' + ${result.grade.toLowerCase()}" th:text="${result.grade}">A</span></td>
+                                <td><span th:class="'badge rounded-pill status-' + ${result.status.name().toLowerCase()}" th:text="${result.status}">APPROVED</span></td>
+                                <td th:text="${result.approvedAt != null ? #temporals.format(result.approvedAt, 'MMM dd, yyyy') : 'Not recorded'}">Jan 01, 2024</td>
+                                <td class="text-end">
+                                    <form method="post" th:action="'/registrar/publish/' + ${result.id}" class="action-form">
+                                        <button type="submit" class="btn btn-sm btn-publish rounded-pill px-3">Publish</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div th:if="${approvedResults.size() == 0}" class="empty-state">
+                        <strong>No approved records waiting</strong>
+                        Approved results will appear here until they are published to students.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer class="footer"><p class="mb-0">&copy; 2024 Bright Future University (BFU). Online Student Result Management System.</p></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

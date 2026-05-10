@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - OSRMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0f2742;
+            --blue: #256d8f;
+            --mist: #f3f7fb;
+            --panel: #ffffff;
+            --ink: #1f2937;
+            --muted: #6b7280;
+            --line: #e6edf3;
+            --gold: #c99a3d;
+            --green: #1f8a70;
+        }
+        * { box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(37,109,143,.18), transparent 32rem),
+                linear-gradient(180deg, #f8fbfd 0%, var(--mist) 100%);
+            color: var(--ink);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .topbar {
+            background: rgba(15,39,66,.96);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(15,39,66,.18);
+        }
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--gold), #f0d28a);
+            color: var(--navy);
+            font-weight: 800;
+            margin-right: .65rem;
+        }
+        .page-shell { padding: 2rem; }
+        .sidebar, .panel, .stat-card, .hero {
+            border: 1px solid rgba(230,237,243,.9);
+            border-radius: 22px;
+            background: rgba(255,255,255,.92);
+            box-shadow: 0 18px 45px rgba(15,39,66,.08);
+        }
+        .sidebar { position: sticky; top: 1.25rem; overflow: hidden; }
+        .sidebar-title { color: var(--muted); font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+        .nav-card .nav-link {
+            color: var(--ink);
+            border-radius: 14px;
+            padding: .85rem 1rem;
+            margin-top: .35rem;
+            font-weight: 700;
+        }
+        .nav-card .nav-link.active, .nav-card .nav-link:hover {
+            background: var(--navy);
+            color: #fff;
+            transform: translateX(2px);
+        }
+        .hero {
+            overflow: hidden;
+            position: relative;
+            background:
+                linear-gradient(135deg, rgba(15,39,66,.96), rgba(37,109,143,.92)),
+                radial-gradient(circle at 85% 0%, rgba(201,154,61,.55), transparent 18rem);
+            color: #fff;
+            padding: 2rem;
+        }
+        .hero:after {
+            content: "";
+            position: absolute;
+            inset: auto -3rem -5rem auto;
+            width: 17rem;
+            height: 17rem;
+            border: 34px solid rgba(255,255,255,.08);
+            border-radius: 50%;
+        }
+        .eyebrow { color: #cfe6f2; font-size: .8rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+        .hero h1 { font-weight: 800; letter-spacing: -.03em; }
+        .hero p { color: rgba(255,255,255,.78); max-width: 44rem; }
+        .stat-card { padding: 1.35rem; height: 100%; }
+        .stat-label { color: var(--muted); font-weight: 700; font-size: .88rem; }
+        .stat-number { color: var(--navy); font-size: 2.35rem; font-weight: 850; line-height: 1; margin-top: .35rem; }
+        .stat-accent { width: 44px; height: 6px; border-radius: 999px; background: var(--gold); margin-top: 1rem; }
+        .panel { overflow: hidden; }
+        .panel-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--line); }
+        .panel-title { color: var(--navy); font-weight: 800; margin: 0; }
+        .action-tile {
+            display: block;
+            padding: 1.1rem;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            text-decoration: none;
+            color: var(--ink);
+            background: #fff;
+            height: 100%;
+            transition: .18s ease;
+        }
+        .action-tile:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 14px 28px rgba(15,39,66,.1); }
+        .action-title { color: var(--navy); font-weight: 800; margin-bottom: .25rem; }
+        .footer { color: var(--muted); padding: 1.5rem 2rem; text-align: center; }
+        @media (max-width: 991px) {
+            .page-shell { padding: 1rem; }
+            .sidebar { position: static; }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark topbar">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="/dashboard">
+            <span class="brand-mark">O</span> OSRMS Admin
+        </a>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <span class="text-white-50 d-none d-sm-inline" sec:authentication="principal.name">Administrator</span>
+            <a href="/logout" class="btn btn-sm btn-outline-light rounded-pill px-3">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container-fluid page-shell">
+    <div class="row g-4">
+        <aside class="col-lg-3 col-xl-2">
+            <div class="sidebar p-3 nav-card">
+                <div class="sidebar-title px-2 mb-2">Administration</div>
+                <nav class="nav flex-column">
+                    <a href="/admin/dashboard" class="nav-link active">Dashboard</a>
+                    <a href="/admin/users" class="nav-link">Students & Users</a>
+                    <a href="/admin/courses" class="nav-link">Courses</a>
+                    <a href="/admin/publish" class="nav-link">Publishing</a>
+                </nav>
+            </div>
+        </aside>
+
+        <section class="col-lg-9 col-xl-10">
+            <div class="hero mb-4">
+                <div class="position-relative">
+                    <div class="eyebrow mb-2">Bright Future University</div>
+                    <h1 class="display-6 mb-2">Administration Dashboard</h1>
+                    <p class="mb-4">Register students, manage course structures, and keep the result workflow organized from one clean control center.</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="/admin/users" class="btn btn-light rounded-pill px-4 fw-bold">Register Student</a>
+                        <a href="/admin/courses" class="btn btn-outline-light rounded-pill px-4 fw-bold">Manage Courses</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Users</div>
+                        <div class="stat-number" th:text="${totalUsers}">0</div>
+                        <div class="stat-accent"></div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Students</div>
+                        <div class="stat-number" th:text="${totalStudents}">0</div>
+                        <div class="stat-accent" style="background: var(--green);"></div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Courses</div>
+                        <div class="stat-number" th:text="${totalCourses}">0</div>
+                        <div class="stat-accent" style="background: var(--blue);"></div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Enrollments</div>
+                        <div class="stat-number" th:text="${totalEnrollments}">0</div>
+                        <div class="stat-accent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title h4">Quick Actions</h2>
+                    <p class="text-muted mb-0">The most common admin tasks, arranged by workflow.</p>
+                </div>
+                <div class="p-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <a class="action-tile" href="/admin/users">
+                                <div class="action-title">Register Students</div>
+                                <div class="text-muted">Create student accounts and assign course enrollments.</div>
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a class="action-tile" href="/admin/courses">
+                                <div class="action-title">Manage Courses</div>
+                                <div class="text-muted">Add course codes, credits, semesters, and descriptions.</div>
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a class="action-tile" href="/admin/publish">
+                                <div class="action-title">Result Publishing</div>
+                                <div class="text-muted">Review the publishing flow and registrar responsibility.</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer class="footer">
+    <p class="mb-0">&copy; 2024 Bright Future University (BFU). Online Student Result Management System.</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

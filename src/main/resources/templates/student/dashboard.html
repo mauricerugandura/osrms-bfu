@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - OSRMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #102a43;
+            --teal: #1f7a8c;
+            --sky: #e8f4f8;
+            --paper: #ffffff;
+            --ink: #1f2937;
+            --muted: #6b7280;
+            --line: #e4edf2;
+            --gold: #c99a3d;
+            --green: #1f8a70;
+        }
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(31,122,140,.16), transparent 34rem),
+                linear-gradient(180deg, #f9fcfd 0%, #eef6f8 100%);
+            color: var(--ink);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .topbar { background: rgba(16,42,67,.96); box-shadow: 0 10px 30px rgba(16,42,67,.16); }
+        .brand-mark { width: 38px; height: 38px; border-radius: 12px; display:inline-flex; align-items:center; justify-content:center; background: linear-gradient(135deg, var(--teal), #9bd7df); color:#fff; font-weight:800; margin-right:.65rem; }
+        .page-shell { padding: 2rem; }
+        .sidebar, .panel, .stat-card, .hero-card { border: 1px solid var(--line); border-radius: 22px; background: rgba(255,255,255,.94); box-shadow: 0 18px 45px rgba(16,42,67,.08); overflow: hidden; }
+        .sidebar { position: sticky; top: 1.25rem; }
+        .sidebar-title { color: var(--muted); font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+        .sidebar .nav-link { color: var(--ink); border-radius: 14px; margin-top:.35rem; padding:.85rem 1rem; font-weight:700; }
+        .sidebar .nav-link.active, .sidebar .nav-link:hover { background: var(--navy); color:#fff; transform: translateX(2px); }
+        .hero-card { position: relative; padding: 2rem; background: linear-gradient(135deg, rgba(16,42,67,.97), rgba(31,122,140,.92)); color:#fff; }
+        .hero-card:after { content:""; position:absolute; right:-4rem; bottom:-5rem; width:17rem; height:17rem; border:34px solid rgba(255,255,255,.08); border-radius:50%; }
+        .eyebrow { color:#bee8ef; font-size:.78rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+        .hero-card h1 { font-weight:850; letter-spacing:-.03em; }
+        .hero-card p { color: rgba(255,255,255,.78); }
+        .student-chip { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding:.45rem .85rem; display:inline-flex; gap:.4rem; align-items:center; }
+        .stat-card { padding:1.35rem; height:100%; }
+        .stat-label { color:var(--muted); font-weight:700; font-size:.88rem; }
+        .stat-number { color:var(--navy); font-size:2.2rem; line-height:1; font-weight:850; margin-top:.4rem; }
+        .stat-accent { width:44px; height:6px; border-radius:999px; background:var(--teal); margin-top:1rem; }
+        .panel-header { padding:1.25rem 1.5rem; border-bottom:1px solid var(--line); background:#fff; }
+        .panel-title { color:var(--navy); font-weight:800; margin:0; }
+        .table thead { background: var(--navy); color:white; }
+        .course-code { color:var(--navy); font-weight:800; }
+        .grade-pill { min-width:42px; display:inline-flex; justify-content:center; border-radius:999px; padding:.25rem .65rem; font-weight:800; }
+        .grade-a { background:#e7f7ef; color:#16724f; }
+        .grade-b { background:#e4f3ff; color:#1f6f9f; }
+        .grade-c { background:#fff6db; color:#9a6b00; }
+        .grade-d { background:#fff0e3; color:#b45309; }
+        .grade-f { background:#fde8e8; color:#b91c1c; }
+        .status-pending { background:#fff4cc; color:#7a5a00; }
+        .status-approved { background:#dff4ff; color:#0e5d75; }
+        .status-published { background:#e5f7ed; color:#166534; }
+        .quick-link { display:block; text-decoration:none; color:var(--ink); border:1px solid var(--line); border-radius:16px; padding:1rem; height:100%; background:#fff; transition:.18s ease; }
+        .quick-link:hover { border-color:var(--teal); transform:translateY(-2px); box-shadow:0 14px 28px rgba(16,42,67,.1); }
+        .quick-title { color:var(--navy); font-weight:800; }
+        .footer { color:var(--muted); padding:1.5rem 2rem; text-align:center; }
+        @media (max-width: 991px) { .page-shell { padding:1rem; } .sidebar { position:static; } }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark topbar">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="/dashboard"><span class="brand-mark">S</span> Student Portal</a>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <span class="text-white-50 d-none d-sm-inline" sec:authentication="principal.name">Student</span>
+            <span class="badge rounded-pill text-bg-light">STUDENT</span>
+            <a href="/logout" class="btn btn-sm btn-outline-light rounded-pill px-3">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container-fluid page-shell">
+    <div class="row g-4">
+        <aside class="col-lg-3 col-xl-2">
+            <div class="sidebar p-3">
+                <div class="sidebar-title px-2 mb-2">Student</div>
+                <nav class="nav flex-column">
+                    <a href="/student/dashboard" class="nav-link active">Dashboard</a>
+                    <a href="/student/results" class="nav-link">My Results</a>
+                    <a href="/student/transcript" class="nav-link">Transcript</a>
+                </nav>
+            </div>
+        </aside>
+
+        <section class="col-lg-9 col-xl-10">
+            <div class="hero-card mb-4">
+                <div class="position-relative">
+                    <div class="eyebrow mb-2">Bright Future University</div>
+                    <h1 class="display-6 mb-2">Welcome, <span th:text="${student.user.name}">Student</span></h1>
+                    <p class="mb-4">Track your academic progress, review published results, and access transcript information from one organized portal.</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="student-chip"><strong>ID</strong> <span th:text="${student.studentId}">STU001</span></span>
+                        <span class="student-chip"><strong>Year</strong> <span th:text="${student.yearOfStudy}">1</span></span>
+                        <span class="student-chip"><strong>Program</strong> <span th:text="${student.program}">Program</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-label">Published Results</div>
+                        <div class="stat-number" th:text="${results.size()}">0</div>
+                        <div class="stat-accent"></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-label">Academic Status</div>
+                        <div class="stat-number fs-2">Active</div>
+                        <div class="stat-accent" style="background:var(--green);"></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-label">Current Year</div>
+                        <div class="stat-number" th:text="${student.yearOfStudy}">1</div>
+                        <div class="stat-accent" style="background:var(--gold);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel mb-4">
+                <div class="panel-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h2 class="panel-title h4">Recent Results</h2>
+                        <p class="text-muted mb-0">Latest grades released to your account.</p>
+                    </div>
+                    <a href="/student/results" class="btn btn-outline-primary rounded-pill px-3">View all</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" th:if="${results.size() > 0}">
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Score</th>
+                                <th>Grade</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="result, iter : ${results}" th:if="${iter.index < 3}">
+                                <td>
+                                    <div class="course-code" th:text="${result.course.courseId}">CS101</div>
+                                    <div class="text-muted" th:text="${result.course.courseName}">Course Name</div>
+                                </td>
+                                <td th:text="${result.score}">85</td>
+                                <td><span th:class="'grade-pill grade-' + ${result.grade.toLowerCase()}" th:text="${result.grade}">A</span></td>
+                                <td><span th:class="'badge rounded-pill status-' + ${result.status.name().toLowerCase()}" th:text="${result.status}">PUBLISHED</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div th:if="${results.size() == 0}" class="alert alert-info m-3">No results are available yet. Published results will appear here.</div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <a class="quick-link" href="/student/results">
+                        <div class="quick-title">Review Results</div>
+                        <div class="text-muted">Open your complete course result history.</div>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a class="quick-link" href="/student/transcript">
+                        <div class="quick-title">View Transcript</div>
+                        <div class="text-muted">Check transcript details and GPA when available.</div>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer class="footer"><p class="mb-0">&copy; 2024 Bright Future University (BFU). Online Student Result Management System.</p></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

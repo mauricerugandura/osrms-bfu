@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publishing - OSRMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0f2742;
+            --blue: #256d8f;
+            --ice: #f3f7fb;
+            --panel: #ffffff;
+            --ink: #1f2937;
+            --muted: #6b7280;
+            --line: #e6edf3;
+            --gold: #c99a3d;
+            --green: #1f8a70;
+            --amber: #b7791f;
+        }
+        * { box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(37,109,143,.16), transparent 32rem),
+                linear-gradient(180deg, #f8fbfd 0%, var(--ice) 100%);
+            color: var(--ink);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background: rgba(15,39,66,.96);
+            box-shadow: 0 10px 30px rgba(15,39,66,.18);
+        }
+        .brand-mark {
+            display: inline-flex;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--gold), #f0d28a);
+            color: var(--navy);
+            font-weight: 800;
+            margin-right: .65rem;
+        }
+        .page-shell { padding: 2rem; }
+        .sidebar, .panel, .hero, .workflow-card {
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            background: rgba(255,255,255,.94);
+            box-shadow: 0 18px 45px rgba(15,39,66,.08);
+        }
+        .sidebar { position: sticky; top: 1.25rem; }
+        .sidebar .nav-link {
+            color: var(--ink);
+            border-radius: 14px;
+            margin-bottom: .35rem;
+            padding: .85rem 1rem;
+            font-weight: 700;
+        }
+        .sidebar .nav-link.active, .sidebar .nav-link:hover {
+            background: var(--navy);
+            color: #fff;
+        }
+        .sidebar-title {
+            color: var(--muted);
+            font-size: .75rem;
+            font-weight: 800;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+        .hero {
+            overflow: hidden;
+            position: relative;
+            background:
+                linear-gradient(135deg, rgba(15,39,66,.96), rgba(37,109,143,.92)),
+                radial-gradient(circle at 90% 0%, rgba(201,154,61,.52), transparent 18rem);
+            color: #fff;
+            padding: 2rem;
+        }
+        .hero:after {
+            content: "";
+            position: absolute;
+            right: -4rem;
+            bottom: -5rem;
+            width: 18rem;
+            height: 18rem;
+            border: 34px solid rgba(255,255,255,.08);
+            border-radius: 50%;
+        }
+        .hero-content { position: relative; max-width: 56rem; }
+        .eyebrow {
+            color: #cfe6f2;
+            font-size: .8rem;
+            font-weight: 800;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+        .hero h1 { font-weight: 850; letter-spacing: -.02em; }
+        .hero p { color: rgba(255,255,255,.8); max-width: 45rem; }
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            border-radius: 999px;
+            background: rgba(255,255,255,.14);
+            border: 1px solid rgba(255,255,255,.2);
+            padding: .55rem .85rem;
+            color: #fff;
+            font-weight: 700;
+            font-size: .9rem;
+        }
+        .panel { overflow: hidden; }
+        .panel-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--line);
+            background: #fff;
+        }
+        .panel-title { color: var(--navy); font-weight: 800; margin: 0; }
+        .notice {
+            border: 1px solid rgba(183,121,31,.24);
+            border-left: 5px solid var(--amber);
+            border-radius: 16px;
+            background: #fff8ea;
+            padding: 1rem 1.1rem;
+        }
+        .notice-title { color: #744a0f; font-weight: 800; }
+        .workflow-card {
+            height: 100%;
+            padding: 1.1rem;
+            border-radius: 18px;
+            box-shadow: none;
+        }
+        .step-number {
+            display: inline-flex;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            background: var(--navy);
+            color: #fff;
+            font-weight: 800;
+            margin-bottom: .85rem;
+        }
+        .workflow-card h3 {
+            color: var(--navy);
+            font-size: 1rem;
+            font-weight: 800;
+            margin-bottom: .35rem;
+        }
+        .role-card {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: #fff;
+            height: 100%;
+        }
+        .role-mark {
+            flex: 0 0 auto;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eaf5f2;
+            color: var(--green);
+            font-weight: 850;
+        }
+        .role-card h3 {
+            color: var(--navy);
+            font-size: 1rem;
+            font-weight: 800;
+            margin-bottom: .25rem;
+        }
+        .table thead { background: var(--navy); color: #fff; }
+        .table td, .table th { vertical-align: middle; }
+        .student-code, .course-code { color: var(--navy); font-weight: 850; }
+        .grade-pill {
+            min-width: 42px;
+            display: inline-flex;
+            justify-content: center;
+            border-radius: 999px;
+            padding: .25rem .65rem;
+            font-weight: 800;
+        }
+        .grade-a { background: #e7f7ef; color: #16724f; }
+        .grade-b { background: #e4f3ff; color: #1f6f9f; }
+        .grade-c { background: #fff6db; color: #9a6b00; }
+        .grade-d { background: #fff0e3; color: #b45309; }
+        .grade-f { background: #fde8e8; color: #b91c1c; }
+        .status-published { background: #e5f7ed; color: #166534; }
+        .btn-primary { background: var(--navy); border-color: var(--navy); }
+        .btn-primary:hover { background: var(--blue); border-color: var(--blue); }
+        .btn-outline-primary { color: var(--navy); border-color: var(--navy); }
+        .btn-outline-primary:hover { background: var(--navy); border-color: var(--navy); }
+        .footer { color: var(--muted); padding: 1.5rem 2rem; text-align: center; }
+        @media (max-width: 991px) {
+            .page-shell { padding: 1rem; }
+            .sidebar { position: static; }
+            .hero { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="/dashboard">
+            <span class="brand-mark">O</span> OSRMS Admin
+        </a>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <span class="text-white-50 d-none d-sm-inline" sec:authentication="principal.name">Administrator</span>
+            <a href="/logout" class="btn btn-sm btn-outline-light rounded-pill px-3">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<main class="container-fluid page-shell">
+    <div class="row g-4">
+        <aside class="col-lg-3 col-xl-2">
+            <div class="sidebar p-3">
+                <div class="sidebar-title px-2 mb-2">Administration</div>
+                <nav class="nav flex-column">
+                    <a href="/admin/dashboard" class="nav-link">Dashboard</a>
+                    <a href="/admin/users" class="nav-link">Students & Users</a>
+                    <a href="/admin/courses" class="nav-link">Courses</a>
+                    <a href="/admin/publish" class="nav-link active">Publishing</a>
+                </nav>
+            </div>
+        </aside>
+
+        <section class="col-lg-9 col-xl-10">
+            <div class="hero mb-4">
+                <div class="hero-content">
+                    <div class="eyebrow mb-2">Result Publishing</div>
+                    <h1 class="display-6 mb-2">Publishing is coordinated through the Registrar</h1>
+                    <p class="mb-4">Admins can monitor the publication workflow here, while final approval and release of student results remains with the Registrar office.</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="status-pill">Admin view</span>
+                        <span class="status-pill">Registrar controlled</span>
+                        <span class="status-pill"><span th:text="${publishedResults.size()}">0</span> student result(s) visible</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel mb-4">
+                <div class="panel-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h2 class="panel-title h4">Publishing Responsibility</h2>
+                        <p class="text-muted mb-0">A clean handoff keeps grades reviewed before they appear in student portals.</p>
+                    </div>
+                    <a href="/admin/dashboard" class="btn btn-outline-primary rounded-pill px-4 fw-bold">Back to Dashboard</a>
+                </div>
+                <div class="p-4">
+                    <div class="notice mb-4">
+                        <div class="notice-title mb-1">Registrar action required</div>
+                        <div class="text-muted">Results are approved and published from the Registrar Dashboard. Coordinate with the Registrar when records are ready for official release.</div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="role-card">
+                                <span class="role-mark">A</span>
+                                <div>
+                                    <h3>Admin Office</h3>
+                                    <p class="text-muted mb-0">Maintains users, course records, and system readiness before the academic review process begins.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="role-card">
+                                <span class="role-mark">R</span>
+                                <div>
+                                    <h3>Registrar Office</h3>
+                                    <p class="text-muted mb-0">Reviews submitted grades, approves official records, and publishes finalized results to students.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel mb-4">
+                <div class="panel-header">
+                    <h2 class="panel-title h4">Publication Workflow</h2>
+                    <p class="text-muted mb-0">The result status path from lecturer entry to student access.</p>
+                </div>
+                <div class="p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6 col-xl-3">
+                            <div class="workflow-card">
+                                <span class="step-number">1</span>
+                                <h3>Grades Entered</h3>
+                                <p class="text-muted mb-0">Lecturers submit student grades into the system as pending results.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3">
+                            <div class="workflow-card">
+                                <span class="step-number">2</span>
+                                <h3>Registrar Review</h3>
+                                <p class="text-muted mb-0">The Registrar checks records for completeness and academic accuracy.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3">
+                            <div class="workflow-card">
+                                <span class="step-number">3</span>
+                                <h3>Approved Records</h3>
+                                <p class="text-muted mb-0">Verified grades move into approved status before official publication.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3">
+                            <div class="workflow-card">
+                                <span class="step-number">4</span>
+                                <h3>Student Access</h3>
+                                <p class="text-muted mb-0">Published results become available on student dashboards and transcripts.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h2 class="panel-title h4">Published Student Results</h2>
+                        <p class="text-muted mb-0">These records are already visible to students in their portal and transcript area.</p>
+                    </div>
+                    <span class="badge rounded-pill text-bg-success px-3 py-2" th:text="${publishedResults.size()} + ' published'">0 published</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" th:if="${publishedResults.size() > 0}">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Course</th>
+                                <th>Lecturer</th>
+                                <th>Score</th>
+                                <th>Grade</th>
+                                <th>Status</th>
+                                <th>Published</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="result : ${publishedResults}">
+                                <td>
+                                    <div class="student-code" th:text="${result.student.studentId}">STU001</div>
+                                    <div class="text-muted" th:text="${result.student.user.name}">Student Name</div>
+                                </td>
+                                <td>
+                                    <div class="course-code" th:text="${result.course.courseId}">CS101</div>
+                                    <div class="text-muted" th:text="${result.course.courseName}">Course Name</div>
+                                </td>
+                                <td th:text="${result.lecturer != null ? result.lecturer.user.name : 'Not assigned'}">Lecturer Name</td>
+                                <td th:text="${result.score}">85.5</td>
+                                <td><span th:class="'grade-pill grade-' + ${result.grade.toLowerCase()}" th:text="${result.grade}">A</span></td>
+                                <td><span class="badge rounded-pill status-published" th:text="${result.status}">PUBLISHED</span></td>
+                                <td th:text="${result.publishedAt != null ? #temporals.format(result.publishedAt, 'MMM dd, yyyy') : 'Not recorded'}">Jan 01, 2024</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div th:if="${publishedResults.size() == 0}" class="alert alert-info m-3">
+                        No published student results yet. Once the Registrar publishes approved records, they will appear here.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer class="footer">
+    <p class="mb-0">&copy; 2024 Bright Future University (BFU). Online Student Result Management System.</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

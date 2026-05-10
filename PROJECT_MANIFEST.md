@@ -325,7 +325,7 @@ All features have been implemented:
 **Location:** Kigali, Rwanda  
 **Administrator Email:** admin@bfu.ac.rw  
 **Project Version:** 1.0.0  
-**Last Updated:** 2024
+**Last Updated:** 2026
 
 ---
 
@@ -342,5 +342,3 @@ This complete, fully functional Spring Boot MVC application is ready for:
 **Status:** 🟢 PRODUCTION READY
 
 ---
-
-**Good luck with your final exam!** 🍀🎓
